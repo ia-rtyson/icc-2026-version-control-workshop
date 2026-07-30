@@ -1,0 +1,14 @@
+# Environment files
+.env
+
+# Runtime configuration (environment-specific)
+**/config/local
+**/config/resources/local
+
+# Backup and converted files
+**/conversion-report.txt
+
+# Project conversion artifacts
+**/projects/conversion-report.txt
+**/migration-log-*.md
+**/.resources/

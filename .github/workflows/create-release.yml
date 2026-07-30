@@ -1,0 +1,85 @@
+name: 1. Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag — leave as 'auto' to use current date/time (yyyy.mm.dd.hh.ss)"
+        required: true
+        default: "auto"
+      notes:
+        description: "Release notes (optional)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  release:
+    name: Tag and create release
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Resolve version
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT: ${{ github.event.inputs.version }}
+        run: |
+          if [ "$INPUT" = "auto" ]; then
+            VERSION=$(date +'%Y.%m.%d.%H.%S')
+            echo "Auto-generated version: $VERSION"
+          else
+            VERSION="$INPUT"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build release notes
+        id: notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.resolve.outputs.version }}
+          MANUAL_NOTES: ${{ github.event.inputs.notes }}
+        run: |
+          PREV=$(gh release list --repo "${{ github.repository }}" --limit 1 --json tagName --jq '.[0].tagName // ""')
+          if [ -n "$PREV" ]; then
+            LOG=$(git log "${PREV}..HEAD" --oneline --no-merges)
+          else
+            LOG=$(git log --oneline --no-merges -20)
+          fi
+          {
+            if [ -n "$MANUAL_NOTES" ]; then
+              echo "$MANUAL_NOTES"
+              echo ""
+            fi
+            echo "## Changes since ${PREV:-beginning}"
+            echo ""
+            if [ -n "$LOG" ]; then
+              echo "$LOG" | sed 's/^/- /'
+            else
+              echo "- No new commits"
+            fi
+          } > /tmp/release-notes.md
+          cat /tmp/release-notes.md
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.resolve.outputs.version }}
+        run: |
+          gh release create "$VERSION" \
+            --repo "${{ github.repository }}" \
+            --title "Release $VERSION" \
+            --notes-file /tmp/release-notes.md \
+            --target master

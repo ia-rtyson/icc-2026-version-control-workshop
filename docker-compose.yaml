@@ -1,0 +1,123 @@
+##################################################################
+# SE Demo Compose Stack
+#
+# Adam Koch, Inductive Automation
+#
+# ${foo:-bar} denotes an environmental variable "foo" with a
+#    default value "bar"
+##################################################################
+
+# Ignition Gateways
+##################################################################
+services:
+  # Ignition dev gateway. Engineering workstation 1
+  # access gateway with http://localhost:{IGN_PORT_DEV}
+  demo-vcs-modes-dev:
+    image: inductiveautomation/ignition:${IGN_RELEASE:-latest}
+    user: 0:0
+    container_name: ${IGN_NAME_DEV:-demo-vcs}
+    pull_policy: always
+    restart: always
+    ports:
+      - ${IGN_PORT_DEV:-8089}:8088
+    volumes:
+      - ign-demo-vcs-modes-dev-data:/usr/local/bin/ignition/data
+      - ign-demo-vcs-modes-dev-resources:/usr/local/bin/ignition/data/config/resources
+      - ign-demo-vcs-modes-dev-projects:/usr/local/bin/ignition/data/projects
+    environment:
+      IGNITION_UID: ${IGN_UID:-1003}
+      IGNITION_GID: ${IGN_GID:-1004}
+      ACCEPT_IGNITION_EULA: 'Y'
+      GATEWAY_ADMIN_USERNAME: admin
+      GATEWAY_ADMIN_PASSWORD: password
+      IGNITION_EDITION: standard
+      TZ: ${TZ:-America/Chicago}
+    command: >
+      -n ${IGN_NAME_DEV:-demo-vcs-modes-dev}
+      --
+      -Dignition.config.mode=${IGN_MODE_DEV:-dev}
+
+  demo-vcs-modes-prod:
+    image: inductiveautomation/ignition:${IGN_RELEASE:-latest}
+    user: 0:0
+    container_name: ${IGN_NAME_PROD:-demo-vcs}
+    pull_policy: always
+    restart: always
+    ports:
+      - ${IGN_PORT_PROD:-8089}:8088
+    volumes:
+      - ign-demo-vcs-modes-prod-data:/usr/local/bin/ignition/data
+      - ign-demo-vcs-modes-prod-resources:/usr/local/bin/ignition/data/config/resources
+      - ign-demo-vcs-modes-prod-projects:/usr/local/bin/ignition/data/projects
+    environment:
+      IGNITION_UID: ${IGN_UID:-1003}
+      IGNITION_GID: ${IGN_GID:-1004}
+      ACCEPT_IGNITION_EULA: 'Y'
+      GATEWAY_ADMIN_USERNAME: admin
+      GATEWAY_ADMIN_PASSWORD: password
+      IGNITION_EDITION: standard
+      TZ: ${TZ:-America/Chicago}
+    command: >
+      -n ${IGN_NAME_PROD:-demo-vcs-modes-prod}
+      --
+      -Dignition.config.mode=${IGN_MODE_PROD:-prod}
+
+  # Dev Postgres Database
+  postgres-dev:
+    image: postgres:15.4
+    container_name: ${POSTGRES_CONTAINER_NAME_DEV:-postgres-vcs-dev}
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASS:-password}
+      POSTGRES_USER: ${POSTGRES_USERNAME:-admin}
+      POSTGRES_DB: ${POSTGRES_NAME:-postgres}
+      TZ: ${TZ:-America/Chicago}
+    ports:
+     - ${POSTGRES_PORT_DEV:-5432}:5432
+    volumes:
+      - postgresVcsDemoDev:/var/lib/postgresql/data
+
+  postgres-prod:
+    image: postgres:15.4
+    container_name: ${POSTGRES_CONTAINER_NAME_PROD:-postgres-vcs-prod}
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASS:-password}
+      POSTGRES_USER: ${POSTGRES_USERNAME:-admin}
+      POSTGRES_DB: ${POSTGRES_NAME:-postgres}
+      TZ: ${TZ:-America/Chicago}
+    ports:
+     - ${POSTGRES_PORT_PROD:-5432}:5432
+    volumes:
+      - postgresVcsDemoProd:/var/lib/postgresql/data
+
+volumes:
+  ign-demo-vcs-modes-dev-data:
+  ign-demo-vcs-modes-dev-resources:
+    driver: local
+    driver_opts:
+      type: none
+      device: services/dev/config/resources
+      o: bind
+  ign-demo-vcs-modes-dev-projects:
+    driver: local
+    driver_opts:
+      type: none
+      device: services/dev/projects
+      o: bind
+  ign-demo-vcs-modes-prod-data:
+  ign-demo-vcs-modes-prod-resources:
+    driver: local
+    driver_opts:
+      type: none
+      device: services/prod/config/resources
+      o: bind
+  ign-demo-vcs-modes-prod-projects:
+    driver: local
+    driver_opts:
+      type: none
+      device: services/prod/projects
+      o: bind
+  postgresVcsDemoDev:
+  postgresVcsDemoProd:
+

@@ -1,0 +1,29 @@
+{
+  "users": [
+    {
+      "uuid": "deb0adaa-a260-4bcc-8ac1-a93ea81df345",
+      "username": "opcuauser",
+      "schedule": "Always",
+      "password": "[BB4920BD]a226ab944541f022fd3a9307d79a76232b123c3cb1c0fb6d737dedcb5675c315",
+      "passwordDate": "20260707.125009412-0500",
+      "passwordHistory": [],
+      "createdDate": "20260707.125009411-0500",
+      "lastModifiedDate": "20260707.125009411-0500",
+      "roles": [
+        "ef1bb264-1435-4448-ad07-4987a462d45c"
+      ],
+      "extraProps": [],
+      "scheduleAdjustments": [],
+      "contactInfos": []
+    }
+  ],
+  "roles": [
+    {
+      "uuid": "ef1bb264-1435-4448-ad07-4987a462d45c",
+      "rolename": "ReadWrite",
+      "description": "OPC UA clients will authenticate against this profile by default.",
+      "createdDate": "20260707.125009411-0500",
+      "lastModifiedDate": "20260707.125009411-0500"
+    }
+  ]
+}
