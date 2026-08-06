@@ -8,6 +8,10 @@ on:
         required: true
         default: "latest"
 
+concurrency:
+  group: deploy-to-prod
+  cancel-in-progress: false
+
 jobs:
   resolve-version:
     name: Resolve version
@@ -27,6 +31,10 @@ jobs:
             echo "Resolved latest: $VERSION"
           else
             VERSION="$INPUT"
+          fi
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not resolve a version to deploy (no releases found?)"
+            exit 1
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
@@ -50,7 +58,7 @@ jobs:
       - name: Scan Config Updates
         run: |
           HOST_IP=$(hostname -I | awk '{print $1}')
-          RESPONSE=$(curl -s --max-time 10 -X POST "http://${HOST_IP}:${{ vars.GATEWAY_PORT }}/data/api/v1/scan/config" \
+          RESPONSE=$(curl -sS -f --max-time 10 -X POST "http://${HOST_IP}:${{ vars.GATEWAY_PORT }}/data/api/v1/scan/config" \
             -H "X-Ignition-API-Token: ${{ secrets.IGNITION_API_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{}')
@@ -59,7 +67,7 @@ jobs:
       - name: Scan Project Updates
         run: |
           HOST_IP=$(hostname -I | awk '{print $1}')
-          RESPONSE=$(curl -s --max-time 10 -X POST "http://${HOST_IP}:${{ vars.GATEWAY_PORT }}/data/api/v1/scan/projects" \
+          RESPONSE=$(curl -sS -f --max-time 10 -X POST "http://${HOST_IP}:${{ vars.GATEWAY_PORT }}/data/api/v1/scan/projects" \
             -H "X-Ignition-API-Token: ${{ secrets.IGNITION_API_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{}')

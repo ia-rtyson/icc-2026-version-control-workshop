@@ -18,12 +18,14 @@ permissions:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+concurrency:
+  group: create-release
+  cancel-in-progress: false
+
 jobs:
   release:
     name: Tag and create release
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Resolve version
@@ -82,4 +84,4 @@ jobs:
             --repo "${{ github.repository }}" \
             --title "Release $VERSION" \
             --notes-file /tmp/release-notes.md \
-            --target master
+            --target main
