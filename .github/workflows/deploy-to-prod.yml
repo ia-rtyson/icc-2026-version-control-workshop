@@ -54,6 +54,7 @@ jobs:
           git rm -r --quiet --cached --ignore-unmatch .
           git checkout "${{ needs.resolve-version.outputs.version }}" -- .
           git clean -fd .
+          git update-ref HEAD "${{ needs.resolve-version.outputs.version }}"
 
       - name: Scan Config Updates
         run: |
