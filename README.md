@@ -6,6 +6,11 @@ deployment modes in Ignition. It spins up a pair of Ignition gateways (`dev` and
 databases, so you can practice a Git-based workflow for promoting config and
 project changes from dev to prod.
 
+## Useful links
+- Version Control Guide: <https://docs.inductiveautomation.com/docs/8.3/tutorials/version-control-guide>
+- Team Environment Best Practices: <https://docs.inductiveautomation.com/docs/8.3/tutorials/version-control-guide/best-practices-for-team-environments>
+- Amazon Workspaces Download: <https://clients.amazonworkspaces.com/>
+
 ## Stack
 
 - **`demo-vcs-modes-dev`** — Ignition gateway running in `dev` config mode
