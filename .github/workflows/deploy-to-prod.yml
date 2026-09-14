@@ -1,4 +1,4 @@
-name: 2. Deploy to Prod
+name: 2. Deploy to Prod - Linux
 
 on:
   workflow_dispatch:
